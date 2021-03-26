@@ -1,4 +1,5 @@
 class ArtistsController < ApplicationController
+  before_action :check_preference, only: :new
   def index
     @artists = Artist.all
   end
@@ -8,7 +9,7 @@ class ArtistsController < ApplicationController
   end
 
   def new
-    @artist = Artist.new
+    
   end
 
   def create
@@ -40,11 +41,19 @@ class ArtistsController < ApplicationController
   def destroy
     @artist = Artist.find(params[:id])
     @artist.destroy
-    flash[:notice] = "Artist deleted."
+    flash[:notice] = 'Artist deleted.'
     redirect_to artists_path
   end
 
   private
+
+  def check_preference
+    if Preference.last.allow_create_artists
+      @artist = Artist.new
+    else
+      redirect_to artists_path, alert: "Can't create a new artist."
+    end
+  end
 
   def artist_params
     params.require(:artist).permit(:name)
